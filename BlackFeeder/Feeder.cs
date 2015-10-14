@@ -13,7 +13,7 @@ namespace BlackFeeder
         private static Font text;
 
         private static bool loaded;
-        private static bool enableFeed;
+        private static bool enableFeed = true;
 
         private static readonly Vector3 DireSpawn = new Vector3(7149, 6696, 383);
         private static readonly Vector3 RadiantSpawn = new Vector3(-7149, -6696, 383);
