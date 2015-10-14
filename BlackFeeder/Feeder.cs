@@ -59,7 +59,7 @@ namespace BlackFeeder
 
             text.DrawText(
                 null,
-                enableFeed ? "BlackFeeder: Feeding - ENABLED! | [G] for toggle" : "BlackFeeder: Feeding - DISABLED! | [G] for toggle",
+                enableFeed ? "BlackFeeder: Feeding - ENABLED! | [B] for toggle" : "BlackFeeder: Feeding - DISABLED! | [B] for toggle",
                 5,
                 96,
                 Color.IndianRed);
