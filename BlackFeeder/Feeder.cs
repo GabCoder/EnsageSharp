@@ -2,88 +2,74 @@
 using Ensage;
 using Ensage.Common;
 using SharpDX;
-using SharpDX.Direct3D9;
 
 namespace BlackFeeder
 {
     internal class Feeder
     {
+        #region Static Fields
+
         private static Hero me;
 
-        private static Font text;
+        public static bool LButton;
 
         private static bool loaded;
-        private static bool enableFeed = true;
+        public static bool EnableFeed;
 
         private static readonly Vector3 DireSpawn = new Vector3(7149, 6696, 383);
         private static readonly Vector3 RadiantSpawn = new Vector3(-7149, -6696, 383);
 
+        #endregion
+
+        #region OnLoad
+
         public static void OnLoad()
         {
-            Game.OnUpdate += OnUpdate;
-            loaded = false;
-            text = new Font(
-                Drawing.Direct3DDevice9,
-                new FontDescription
-                {
-                    FaceName = "Tahoma",
-                    Height = 13,
-                    OutputPrecision = FontPrecision.Default,
-                    Quality = FontQuality.Default
-                });
-
-            Drawing.OnPreReset += Drawing_OnPreReset;
-            Drawing.OnPostReset += Drawing_OnPostReset;
-            Drawing.OnEndScene += Drawing_OnEndScene;
-            AppDomain.CurrentDomain.DomainUnload += CurrentDomainDomainUnload;
-            Game.OnWndProc += OnWndProc;
-        }
-
-        private static void CurrentDomainDomainUnload(object sender, EventArgs e)
-        {
-            text.Dispose();
-        }
-
-        private static void Drawing_OnEndScene(EventArgs args)
-        {
-            if (Drawing.Direct3DDevice9 == null || Drawing.Direct3DDevice9.IsDisposed || !Game.IsInGame)
+            try
             {
-                return;
-            }
+                loaded = false;
 
-            var player = ObjectMgr.LocalPlayer;
-            if (player == null || player.Team == Team.Observer)
+                DrawHandler.Load();
+
+                Game.OnUpdate += OnUpdate;
+                Game.OnWndProc += OnWndProc;
+
+                Drawing.OnPreReset += DrawHandler.OnPreReset;
+                Drawing.OnPostReset += DrawHandler.OnPostReset;
+                Drawing.OnEndScene += DrawHandler.OnEndScene;
+                AppDomain.CurrentDomain.DomainUnload += DrawHandler.DomainUnload;
+            }
+            catch (Exception e)
             {
-                return;
+                Console.WriteLine("An error occurred: '{0}'", e);
             }
-
-            text.DrawText(
-                null,
-                enableFeed ? "BlackFeeder: Feeding - ENABLED! | [B] for toggle" : "BlackFeeder: Feeding - DISABLED! | [B] for toggle",
-                5,
-                96,
-                Color.IndianRed);
         }
 
-        private static void Drawing_OnPostReset(EventArgs args)
-        {
-            text.OnResetDevice();
-        }
+        #endregion
 
-        private static void Drawing_OnPreReset(EventArgs args)
-        {
-            text.OnLostDevice();
-        }
+        #region OnWndProc
 
         private static void OnWndProc(WndEventArgs args)
         {
-            if (args.Msg != (ulong)Utils.WindowsMessages.WM_KEYUP || args.WParam != 'B' || Game.IsChatOpen)
+            if (args.WParam != 1 || Game.IsChatOpen || !Utils.SleepCheck("clicker"))
             {
+                LButton = false;
                 return;
             }
-            
-            enableFeed = !enableFeed;
+            else
+            {
+                LButton = true;
+            }
+
+            if ((args.Msg == (uint)Utils.WindowsMessages.WM_KEYUP) || args.WParam  != 1 && DrawHandler.MouseOn(1850, 240, 15, 15) || Game.IsChatOpen)
+            {
+                EnableFeed = !EnableFeed;
+            }
         }
+
+        #endregion
+
+        #region OnUpdate
 
         private static void OnUpdate(EventArgs args)
         {
@@ -108,23 +94,34 @@ namespace BlackFeeder
                 return;
             }
 
-            if (enableFeed)
+            if (EnableFeed)
             {
-                Feed();
+                if (Utils.SleepCheck("feedCheck"))
+                {
+                    OnFeed();
+                }
             }
         }
 
-        private static void Feed()
+        #endregion
+
+        #region OnFeed
+
+        private static void OnFeed()
         {
             switch (me.Team)
             {
                 case Team.Dire:
                     me.Move(RadiantSpawn);
+                    Utils.Sleep(250, "feedCheck");
                     break;
                 case Team.Radiant:
                     me.Move(DireSpawn);
+                    Utils.Sleep(250, "feedCheck");
                     break;
             }
         }
+
+        #endregion
     }
 }
