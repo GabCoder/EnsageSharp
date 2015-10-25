@@ -10,7 +10,7 @@ namespace ProBlink
     {
         #region Static Fields
 
-        private static Hero me;
+        public static Hero Me;
 
         private static Item blink;
 
@@ -72,7 +72,7 @@ namespace ProBlink
                 LButton = false;
             }
 
-            if (DrawHandler.MouseOn(1850, 442, 15, 15))
+            if (DrawHandler.MouseOn(1850, 442, 15, 15) && args.Msg == LButtonDown)
             {
                 QuickCast = !QuickCast;
                 Utils.Sleep(250, "clicker");
@@ -94,7 +94,7 @@ namespace ProBlink
                     Aiming = false;
                 }
 
-                if (Aiming && args.Msg == LButtonDown)
+                if (Aiming && args.Msg == LButtonDown && blink.Cooldown == 0)
                 {
                     blinkKey = true;
                     return;
@@ -110,16 +110,16 @@ namespace ProBlink
         {
             if (!loaded)
             {
-                me = ObjectMgr.LocalHero;
-                if (!Game.IsInGame || me == null)
+                Me = ObjectMgr.LocalHero;
+                if (!Game.IsInGame || Me == null)
                 {
                     return;
                 }
-                blink = me.FindItem("item_blink");
+                blink = Me.FindItem("item_blink");
                 loaded = true;
             }
 
-            if (!Game.IsInGame || me == null)
+            if (!Game.IsInGame || Me == null)
             {
                 blink = null;
                 loaded = false;
@@ -133,7 +133,7 @@ namespace ProBlink
 
             if (blink == null)
             {
-                blink = me.FindItem("item_blink");
+                blink = Me.FindItem("item_blink");
             }
 
             MaxDistanceBlink();
@@ -151,15 +151,15 @@ namespace ProBlink
                 {
                     var distance =
                         Math.Sqrt(
-                            Math.Pow(Game.MousePosition.X - me.Position.X, 2)
-                            + Math.Pow(Game.MousePosition.Y - me.Position.Y, 2));
+                            Math.Pow(Game.MousePosition.X - Me.Position.X, 2)
+                            + Math.Pow(Game.MousePosition.Y - Me.Position.Y, 2));
 
                     if (distance > 0)
                     {
                         if (distance > 1200 && blink.Cooldown == 0)
                         {
-                            var expectedX = ((Game.MousePosition.X - me.Position.X) / distance) * 1199 + me.Position.X;
-                            var expectedY = ((Game.MousePosition.Y - me.Position.Y) / distance) * 1199 + me.Position.Y;
+                            var expectedX = ((Game.MousePosition.X - Me.Position.X) / distance) * 1199 + Me.Position.X;
+                            var expectedY = ((Game.MousePosition.Y - Me.Position.Y) / distance) * 1199 + Me.Position.Y;
                             var blinkPos = new Vector2((float)expectedX, (float)expectedY);
 
                             blink.UseAbility((Vector3)blinkPos);
