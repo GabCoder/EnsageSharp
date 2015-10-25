@@ -13,3 +13,9 @@ Thanks for reading this load of bullshit, now off to serious stuff:
 #Profile
 
 LeagueSharp Profile: https://www.joduska.me/forum/user/38-blacky/
+
+#List of assemblies:
+
+-BlackFeeder
+
+-ProBlink
