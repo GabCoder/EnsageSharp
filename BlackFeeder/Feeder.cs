@@ -14,7 +14,7 @@ namespace BlackFeeder
         public static bool LButton;
 
         private static bool loaded;
-        public static bool EnableFeed;
+        public static bool EnableFeed { get; set; }
 
         private static readonly Vector3 DireSpawn = new Vector3(7149, 6696, 383);
         private static readonly Vector3 RadiantSpawn = new Vector3(-7149, -6696, 383);
@@ -61,9 +61,10 @@ namespace BlackFeeder
                 LButton = true;
             }
 
-            if ((args.Msg == (uint)Utils.WindowsMessages.WM_KEYUP) || args.WParam  != 1 && DrawHandler.MouseOn(1850, 240, 15, 15) || Game.IsChatOpen)
+            if (DrawHandler.MouseOn(DrawHandler.X + 150, DrawHandler.Y + 40, 15, 15))
             {
                 EnableFeed = !EnableFeed;
+                Utils.Sleep(250, "clicker");
             }
         }
 

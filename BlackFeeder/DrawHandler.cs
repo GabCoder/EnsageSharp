@@ -13,6 +13,11 @@ namespace BlackFeeder
         private static Line line;
         private static Font text;
 
+        public static float X = 0;
+        public static float Y = 0;
+
+        public static bool MenuMoving { get; set; }
+
         #endregion
 
         #region Load
@@ -27,6 +32,9 @@ namespace BlackFeeder
                         FaceName = "Segoe UI", Height = 17, OutputPrecision = FontPrecision.Default,
                         Quality = FontQuality.ClearTypeNatural
                     });
+
+            X = 1700;
+            Y = 200;
 
             Drawing.OnPreReset += OnPreReset;
             Drawing.OnPostReset += OnPostReset;
@@ -51,15 +59,37 @@ namespace BlackFeeder
                 return;
             }
 
-            DrawFilledBox(1700, 200, 200, 70, new ColorBGRA(0, 0, 0, 100));
-            DrawLine(1700, 200, 1900, 200, 1, new ColorBGRA(1, 169, 234, 100));
-            DrawShadowText("BlackFeeder", 1710, 205, Color.White, text);
-            DrawShadowText("|", 1800, 205, Color.White, text);
-            DrawShadowText(Feeder.EnableFeed ? "ENABLED" : "DISABLED", 1825, 205, Color.White, text);
-            DrawLine(1700, 230, 1900, 230, 1, new ColorBGRA(1, 169, 234, 100));
-            DrawShadowText("Enable Feeding", 1710, 240, Color.White, text);
-            DrawButton(1850, 242, 15, 15, 2, ref Feeder.EnableFeed, true);
-            DrawLine(1700, 270, 1900, 270, 1, new ColorBGRA(1, 169, 234, 100));
+            if (Game.IsKeyDown(0x42))
+            {
+                MenuMoving = true;
+            }
+            else
+            {
+                MenuMoving = false;
+            }
+
+            if (MenuMoving)
+            {
+                Vector2 mousePos = Game.MouseScreenPosition;
+                X = mousePos.X;
+                Y = mousePos.Y;
+            }
+
+            DrawFilledBox(X, Y - 15, 200, 15,
+                MouseOn(X, Y - 15, 200, 15)
+                    ? new ColorBGRA(0, 119, 166, 100)
+                    : MenuMoving ? new ColorBGRA(1, 169, 234, 100) : new ColorBGRA(37, 37, 37, 100));
+            DrawShadowText("Move menu with 'B'", (int)(X + 40), (int)(Y - 17), Color.White, text);
+            DrawFilledBox(X, Y, 200, 70, new ColorBGRA(0, 0, 0, 100));
+            DrawLine(X, Y, X + 200, Y, 1, new ColorBGRA(1, 169, 234, 100));
+            DrawShadowText("BlackFeeder", (int)(X + 10), (int)(Y + 5), Color.White, text);
+            DrawShadowText("|", (int)(X + 100), (int)(Y + 5), Color.White, text);
+            DrawShadowText(Feeder.EnableFeed ? "ENABLED" : "DISABLED", (int)(X + 125), (int)(Y + 5), Color.White, text);
+            DrawLine(X, Y + 30, X + 200, Y + 30, 1, new ColorBGRA(1, 169, 234, 100));
+            DrawShadowText("Enable Feeding", (int)(X + 10), (int)(Y + 40), Color.White, text);
+            var enableFeed = Feeder.EnableFeed;
+            DrawButton(X + 150, Y + 42, 15, 15, 2, ref enableFeed, true);
+            DrawLine(X, Y + 70, X + 200, Y + 70, 1, new ColorBGRA(1, 169, 234, 100));
         }
 
         #endregion
