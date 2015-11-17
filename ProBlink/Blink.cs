@@ -2,10 +2,13 @@
 using Ensage;
 using Ensage.Common;
 using Ensage.Common.Extensions;
+using Menu = Ensage.Common.Menu.Menu;
 using SharpDX;
 
 namespace ProBlink
 {
+    using Ensage.Common.Menu;
+
     internal class Blink
     {
         #region Static Fields
@@ -14,16 +17,8 @@ namespace ProBlink
 
         private static Item blink;
 
-        public static bool QuickCast { get; set; }
-        public static bool Aiming;
-        private static bool blinkKey;
+        public static Menu Menu;
         private static bool loaded;
-
-        public static bool LButton;
-
-        private const int KeyDown = 0x0100;
-        private const int RButtonDown = 0x0204;
-        private const int LButtonDown = 0x0201;
 
         #endregion
 
@@ -36,69 +31,13 @@ namespace ProBlink
                 loaded = false;
                 blink = null;
 
-                DrawHandler.Load();
+                MenuGenerator.Load();
 
-                Game.OnWndProc += OnWndProc;
                 Game.OnUpdate += OnUpdate;
-
-                Drawing.OnPreReset += DrawHandler.OnPreReset;
-                Drawing.OnPostReset += DrawHandler.OnPostReset;
-                Drawing.OnEndScene += DrawHandler.OnEndScene;
-                AppDomain.CurrentDomain.DomainUnload += DrawHandler.DomainUnload;
             }
             catch (Exception e)
             {
                 Console.WriteLine("An error occurred: '{0}'", e);
-            }
-        }
-
-        #endregion
-
-        #region OnWndProc
-
-        private static void OnWndProc(WndEventArgs args)
-        {
-            if (!Game.IsInGame || !loaded)
-            {
-                return;
-            }
-
-            if (args.WParam == 1 || !Game.IsChatOpen || Utils.SleepCheck("clicker"))
-            {
-                LButton = true;
-            }
-            else
-            {
-                LButton = false;
-            }
-
-            if (DrawHandler.MouseOn(1850, 442, 15, 15) && args.Msg == LButtonDown)
-            {
-                QuickCast = !QuickCast;
-                Utils.Sleep(250, "clicker");
-            }
-
-            if (blink != null)
-            {
-                if (args.Msg == KeyDown && args.WParam == 'D' && !Game.IsChatOpen)
-                {
-                    if (QuickCast)
-                    {
-                        blinkKey = true;
-                    }
-                    Aiming = true;
-                }
-
-                if (Aiming && args.Msg == RButtonDown)
-                {
-                    Aiming = false;
-                }
-
-                if (Aiming && args.Msg == LButtonDown && blink.Cooldown == 0)
-                {
-                    blinkKey = true;
-                    return;
-                }
             }
         }
 
@@ -136,7 +75,13 @@ namespace ProBlink
                 blink = Me.FindItem("item_blink");
             }
 
-            MaxDistanceBlink();
+            if (Menu.Item("cast.quick.enable").GetValue<bool>())
+            {
+                if (Utils.SleepCheck("blinkCheck"))
+                {
+                    MaxDistanceBlink();
+                }
+            }
         }
 
         #endregion
@@ -145,9 +90,9 @@ namespace ProBlink
 
         private static void MaxDistanceBlink()
         {
-            if (blinkKey)
+            if (Menu.Item("blink.key").GetValue<KeyBind>().Active)
             {
-                if (blink != null)
+                if (blink != null && blink.Cooldown == 0)
                 {
                     var distance =
                         Math.Sqrt(
@@ -156,22 +101,20 @@ namespace ProBlink
 
                     if (distance > 0)
                     {
-                        if (distance > 1200 && blink.Cooldown == 0)
+                        if (distance > 1200)
                         {
                             var expectedX = ((Game.MousePosition.X - Me.Position.X) / distance) * 1199 + Me.Position.X;
                             var expectedY = ((Game.MousePosition.Y - Me.Position.Y) / distance) * 1199 + Me.Position.Y;
                             var blinkPos = new Vector2((float)expectedX, (float)expectedY);
 
                             blink.UseAbility((Vector3)blinkPos);
-                            blinkKey = false;
-                            Aiming = false;
+                            Utils.Sleep(250, "blinkCheck");
                         }
                         else
                         {
                             var blinkPos = new Vector2(Game.MousePosition.X, Game.MousePosition.Y);
                             blink.UseAbility((Vector3)blinkPos);
-                            blinkKey = false;
-                            Aiming = false;
+                            Utils.Sleep(250, "blinkCheck");
                         }
                     }
                 }

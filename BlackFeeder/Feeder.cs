@@ -1,6 +1,7 @@
 ﻿using System;
 using Ensage;
 using Ensage.Common;
+using Menu = Ensage.Common.Menu.Menu;
 using SharpDX;
 
 namespace BlackFeeder
@@ -11,10 +12,8 @@ namespace BlackFeeder
 
         private static Hero me;
 
-        public static bool LButton;
-
+        public static Menu Menu;
         private static bool loaded;
-        public static bool EnableFeed { get; set; }
 
         private static readonly Vector3 DireSpawn = new Vector3(7149, 6696, 383);
         private static readonly Vector3 RadiantSpawn = new Vector3(-7149, -6696, 383);
@@ -29,42 +28,12 @@ namespace BlackFeeder
             {
                 loaded = false;
 
-                DrawHandler.Load();
-
+                MenuGenerator.Load();
                 Game.OnUpdate += OnUpdate;
-                Game.OnWndProc += OnWndProc;
-
-                Drawing.OnPreReset += DrawHandler.OnPreReset;
-                Drawing.OnPostReset += DrawHandler.OnPostReset;
-                Drawing.OnEndScene += DrawHandler.OnEndScene;
-                AppDomain.CurrentDomain.DomainUnload += DrawHandler.DomainUnload;
             }
             catch (Exception e)
             {
                 Console.WriteLine("An error occurred: '{0}'", e);
-            }
-        }
-
-        #endregion
-
-        #region OnWndProc
-
-        private static void OnWndProc(WndEventArgs args)
-        {
-            if (args.WParam != 1 || Game.IsChatOpen || !Utils.SleepCheck("clicker"))
-            {
-                LButton = false;
-                return;
-            }
-            else
-            {
-                LButton = true;
-            }
-
-            if (DrawHandler.MouseOn(DrawHandler.X + 150, DrawHandler.Y + 40, 15, 15))
-            {
-                EnableFeed = !EnableFeed;
-                Utils.Sleep(250, "clicker");
             }
         }
 
@@ -95,7 +64,7 @@ namespace BlackFeeder
                 return;
             }
 
-            if (EnableFeed)
+            if (Menu.Item("Feeding.Activated").GetValue<bool>())
             {
                 if (Utils.SleepCheck("feedCheck"))
                 {
