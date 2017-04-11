@@ -49,7 +49,7 @@ namespace ProBlink
         {
             if (!loaded)
             {
-                Me = ObjectMgr.LocalHero;
+                Me = ObjectManager.LocalHero;
                 if (!Game.IsInGame || Me == null)
                 {
                     return;

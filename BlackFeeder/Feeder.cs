@@ -45,7 +45,8 @@ namespace BlackFeeder
         {
             if (!loaded)
             {
-                me = ObjectMgr.LocalHero;
+                me = ObjectManager.LocalHero;
+
                 if (!Game.IsInGame || me == null)
                 {
                     return;
